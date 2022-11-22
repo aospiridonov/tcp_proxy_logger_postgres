@@ -7,12 +7,18 @@ services:
   db:
     container_name: db
     restart: always
+    ports:
+      - "6101:6101"
     environment:
       - POSTGRES_PASSWORD=root
       - POSTGRES_USER=admin
     image: postgres:15.1-alpine
-    volumes:
-      - db_vol:/var/lib/postgresql/data
+    #volumes:
+    #  - db_vol:/var/lib/postgresql/data
+    command: 
+      - "postgres"
+      - "-c"
+      - "port=6101"
     networks:
       - internal_net
 
@@ -32,23 +38,26 @@ services:
       - internal_net
 
   postgres_sysbench:
-    container_name: postgres_sysbench
     build: ./postgres_sysbench
+    container_name: postgres_sysbench
     environment:
-      - PORT=6101
       - DB_USERNAME=admin
       - DB_PASSWORD=root
       - DB_HOST=db
       - DB_PORT=6101
       - DB_NAME=postgres
+      - SYSBENCH_THREAD=1
+      - SYSBENCH_TIME=10
+    command: 
+      - "./run_sysbench.sh"
     networks:
       - internal_net
     depends_on:
       - db
       - proxy
 
-volumes:
-  db_vol: {}
+#volumes:
+#  db_vol: {}
 
 networks:
   internal_net:
