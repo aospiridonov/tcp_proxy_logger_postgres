@@ -1,0 +1,55 @@
+version: '3.5'
+
+# 6100 - proxy
+# 6101 - db
+
+services:
+  db:
+    container_name: db
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_USER=admin
+    image: postgres:15.1-alpine
+    volumes:
+      - db_vol:/var/lib/postgresql/data
+    networks:
+      - internal_net
+
+  proxy:
+    container_name: proxy
+    build: ./proxy
+    environment:
+      - PORT=6101
+      - DB_USERNAME=admin
+      - DB_PASSWORD=root
+      - DB_HOST=db
+      - DB_PORT=6101
+      - DB_NAME=postgres
+    depends_on:
+      - db
+    networks:
+      - internal_net
+
+  postgres_sysbench:
+    container_name: postgres_sysbench
+    build: ./postgres_sysbench
+    environment:
+      - PORT=6101
+      - DB_USERNAME=admin
+      - DB_PASSWORD=root
+      - DB_HOST=db
+      - DB_PORT=6101
+      - DB_NAME=postgres
+    networks:
+      - internal_net
+    depends_on:
+      - db
+      - proxy
+
+volumes:
+  db_vol: {}
+
+networks:
+  internal_net:
+    driver: bridge
