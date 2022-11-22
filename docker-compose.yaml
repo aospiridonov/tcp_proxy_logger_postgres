@@ -21,10 +21,12 @@ services:
       - "port=6101"
     networks:
       - internal_net
+    profiles: ["dev"]
 
   proxy:
     container_name: proxy
     build: ./proxy
+    restart: always
     environment:
       - PORT=6101
       - DB_USERNAME=admin
@@ -36,6 +38,7 @@ services:
       - db
     networks:
       - internal_net
+    profiles: ["dev"]
 
   postgres_sysbench:
     build: ./postgres_sysbench
@@ -55,6 +58,7 @@ services:
     depends_on:
       - db
       - proxy
+    profiles: ["dev"]
 
 #volumes:
 #  db_vol: {}
