@@ -8,7 +8,7 @@ class TcpProxy : private Proxy {
 public:
   TcpProxy(/* args */);
   ~TcpProxy();
-  virtual bool connect() override;
+  virtual bool init() override;
   virtual void run() override;
   virtual void log(const std::string &data) override;
 
@@ -18,4 +18,5 @@ private:
   struct sockaddr host_socket_address_;
   int proxy_socket_fd_ = -1;
   char buffer_[1024];
+  fd_set proxy_fd_set_, client_fd_set_;
 };

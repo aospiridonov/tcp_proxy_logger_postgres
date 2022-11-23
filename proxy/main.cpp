@@ -5,7 +5,7 @@
 int main() {
   std::cout << "Run proxy" << std::endl;
   TcpProxy proxy;
-  bool state = proxy.connect();
+  bool state = proxy.init();
   if (state) {
     std::cout << "Connected" << std::endl;
   }

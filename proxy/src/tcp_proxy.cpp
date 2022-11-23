@@ -17,7 +17,7 @@ TcpProxy::TcpProxy(/* args */) {
 
 TcpProxy::~TcpProxy() {}
 
-bool TcpProxy::connect() {
+bool TcpProxy::init() {
   // config connect to host (as client)
   struct sockaddr_in host_socket_address_in;
   memset(&host_socket_address_in, 0, sizeof(host_socket_address_in));
@@ -28,17 +28,19 @@ bool TcpProxy::connect() {
          sizeof(host_socket_address_in));
 
   // config socket for proxy
-  proxy_socket_fd_ = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+  proxy_socket_fd_ = socket(PF_INET, SOCK_STREAM, IPPROTO_IP);
   if (proxy_socket_fd_ == -1) {
     std::cerr << "Can not create soket" << std::endl;
     return false;
   }
+  std::cout << "proxy_socket_fd: " << proxy_socket_fd_ << std::endl;
 
   struct sockaddr_in proxy_socket_address_in;
   memset(&proxy_socket_address_in, 0, sizeof(proxy_socket_address_in));
   proxy_socket_address_in.sin_family = AF_INET;
   proxy_socket_address_in.sin_port = htons(proxy_port_);
   proxy_socket_address_in.sin_addr.s_addr = htonl(INADDR_ANY);
+
   // bind proxy socket
   if (bind(proxy_socket_fd_, (struct sockaddr *)&proxy_socket_address_in,
            sizeof(proxy_socket_address_in)) == -1) {
@@ -53,6 +55,10 @@ bool TcpProxy::connect() {
     return false;
   }
 
+  // FD_ZERO(proxy_fd_set_);
+  // FD_ZERO(client_fd_set_);
+  // FD_SET(proxy_socket_fd_, proxy_fd_set_)
+
   return true;
 }
 
@@ -62,16 +68,35 @@ void TcpProxy::run() {
     if (connect_fd == -1) {
       std::cerr << "Accept failed" << std::endl;
       close(proxy_socket_fd_);
-      return;
+      continue;
     }
     std::cout << "connect_fd: " << connect_fd << std::endl;
-    int size = recv(connect_fd, buffer_, sizeof buffer, 0);
+    int size = recv(connect_fd, buffer_, sizeof buffer_, 0);
     if (size > 0) {
+      {
+        auto host_socket_fd_ = socket(PF_INET, SOCK_STREAM, IPPROTO_IP);
+        if (host_socket_fd_ == -1) {
+          std::cerr << "Can not create host soket" << std::endl;
+          continue;
+        }
+
+        if (connect(host_socket_fd_, &host_socket_address_,
+                    sizeof(host_socket_address_)) == 0) {
+          std::cout << "host_socket_fd_: " << host_socket_fd_ << std::endl;
+          send(host_socket_fd_, buffer_, size, 0);
+          std::cout << "SENDED" << std::endl;
+        } else {
+          close(host_socket_fd_);
+          continue;
+        }
+        close(host_socket_fd_);
+      }
+
       log({buffer_}); // log recive message
     } else {
       std::cout << "size: " << size << std::endl;
     }
-    
+
     if (shutdown(connect_fd, SHUT_RDWR) == -1) {
       std::cerr << "Shutdown failed" << std::endl;
       close(connect_fd);
