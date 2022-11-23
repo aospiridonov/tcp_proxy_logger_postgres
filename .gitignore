@@ -32,4 +32,4 @@
 *.app
 temp/
 proxy/build/
-.vscode/settings.json
+.vscode/
