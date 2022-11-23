@@ -64,10 +64,14 @@ void TcpProxy::run() {
       close(proxy_socket_fd_);
       return;
     }
-    std::cout << connect_fd << std::endl;
-    /* perform read write operations ...
-      read(ConnectFD, buff, size)
-      */
+    std::cout << "connect_fd: " << connect_fd << std::endl;
+    int size = recv(connect_fd, buffer_, sizeof buffer, 0);
+    if (size > 0) {
+      log({buffer_}); // log recive message
+    } else {
+      std::cout << "size: " << size << std::endl;
+    }
+    
     if (shutdown(connect_fd, SHUT_RDWR) == -1) {
       std::cerr << "Shutdown failed" << std::endl;
       close(connect_fd);
@@ -77,4 +81,8 @@ void TcpProxy::run() {
     close(connect_fd);
   }
   close(proxy_socket_fd_);
+}
+
+void TcpProxy::log(const std::string &data) {
+  std::cout << "message: " << data << std::endl;
 }
