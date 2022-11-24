@@ -32,4 +32,9 @@
 *.app
 temp/
 proxy/build/
+proxy/builddir/
+proxy/CMakeFiles/
+cmake_install.cmake
+CMakeCache.txt
+Makefile
 .vscode/
