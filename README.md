@@ -35,3 +35,57 @@ The purpose of the test task is to test the professional skills of candidates fo
 ### Run code with use docker compose
 
 ``docker compose up``
+
+### Short description (Короткое описание)
+Из **docker compose** собирается 3 сервиса(контейнера):
+
+- **db** - на нем находится postgres с портом на *6101*
+- **proxy** - это прокси который открыт на порте *6100* и который общается с портом базы данных *6100*, логи сохраняются в файле *log.txt* рядом с исполняемым файлом в своем контейнере
+- **postgres_sysbench** - это сервис на котором висит sysbench для и он общается с портом *6100*
+  
+Контейнеры запускаются каждый на своем сетевом адресе указаном в конфигурации.
+
+Сервисы **proxy** и **postgres_sysbench** вначале собираются, потом запускаются (локальные образы).
+
+Логи от *postgres_sysbench*:
+
+postgres_sysbench  | SQL statistics:
+postgres_sysbench  |     queries performed:
+postgres_sysbench  |         read:                            67550
+postgres_sysbench  |         write:                           19300
+postgres_sysbench  |         other:                           9650
+postgres_sysbench  |         total:                           96500
+postgres_sysbench  |     transactions:                        4825   (48.24 per sec.)
+postgres_sysbench  |     queries:                             96500  (964.90 per sec.)
+postgres_sysbench  |     ignored errors:                      0      (0.00 per sec.)
+postgres_sysbench  |     reconnects:                          0      (0.00 per sec.)
+postgres_sysbench  | 
+postgres_sysbench  | Throughput:
+postgres_sysbench  |     events/s (eps):                      48.2449
+postgres_sysbench  |     time elapsed:                        100.0105s
+postgres_sysbench  |     total number of events:              4825
+postgres_sysbench  | 
+postgres_sysbench  | Latency (ms):
+postgres_sysbench  |          min:                                    3.49
+postgres_sysbench  |          avg:                                   20.73
+postgres_sysbench  |          max:                                  128.94
+postgres_sysbench  |          95th percentile:                       48.34
+postgres_sysbench  |          sum:                                99998.35
+postgres_sysbench  | 
+postgres_sysbench  | Threads fairness:
+postgres_sysbench  |     events (avg/stddev):           4825.0000/0.00
+postgres_sysbench  |     execution time (avg/stddev):   99.9984/0.00
+postgres_sysbench  | 
+postgres_sysbench exited with code 0
+
+Через **proxy** так же можно ''достучаться'' до базы данных снаружи. В vscode расширение
+
+``
+ext install cweijan.vscode-postgresql-client2
+``
+- Вкладка PostgreSQL
+- host=127.0.0.1
+- port=6100
+- username=admin
+- password=root
+- database=postgres
