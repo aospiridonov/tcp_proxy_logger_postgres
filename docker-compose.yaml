@@ -20,24 +20,25 @@ services:
       - "-c"
       - "port=6101"
     networks:
-      - internal_net
+      internal_net:
+        ipv4_address: 172.20.0.5
     profiles: ["dev"]
 
   proxy:
+    ports:
+      - "6100:6100"
     container_name: proxy
     build: ./proxy
     restart: always
     environment:
+      - PROXY_PORT=6100
+      - HOST=172.20.0.5
       - PORT=6101
-      - DB_USERNAME=admin
-      - DB_PASSWORD=root
-      - DB_HOST=db
-      - DB_PORT=6101
-      - DB_NAME=postgres
     depends_on:
       - db
     networks:
-      - internal_net
+      internal_net:
+        ipv4_address: 172.20.0.6
     profiles: ["dev"]
 
   postgres_sysbench:
@@ -46,16 +47,20 @@ services:
     environment:
       - DB_USERNAME=admin
       - DB_PASSWORD=root
-      - DB_HOST=db
-      - DB_PORT=6101
+      - DB_HOST=proxy
+      - DB_PORT=6100
       - DB_NAME=postgres
-      - SYSBENCH_THREAD=1
-      - SYSBENCH_TIME=10
+      - SYSBENCH_THREAD=10
+      - SYSBENCH_TIME=100
     command: 
       - "./run_sysbench.sh"
     networks:
-      - internal_net
+      internal_net:
+        ipv4_address: 172.20.0.7
     depends_on:
+      - db
+      - proxy
+    links:
       - db
       - proxy
     profiles: ["dev"]
@@ -63,6 +68,10 @@ services:
 #volumes:
 #  db_vol: {}
 
+
 networks:
   internal_net:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24

@@ -16,7 +16,6 @@ RUN apt-get update \
   && make install \
   && make clean
 
-COPY "compile_sysbench.sh" /root
 COPY "run_sysbench.sh" /root
 COPY "intro_message.sh" /root
 RUN chmod +x intro_message.sh
