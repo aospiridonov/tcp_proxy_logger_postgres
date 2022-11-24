@@ -19,7 +19,7 @@ TcpProxy::TcpProxy() {
   if (const char *env_p = std::getenv("PORT"))
     host_port_ = atoi(env_p);
 
-  host_addres_ = "localhost";
+  host_addres_ = "127.0.0.1";
   if (const char *env_p = std::getenv("HOST"))
     host_addres_ = {env_p};
 }
@@ -45,8 +45,11 @@ bool TcpProxy::init() {
   memset(&host_socket_address_in, 0, sizeof(host_socket_address_in));
   host_socket_address_in.sin_family = AF_INET;
   host_socket_address_in.sin_port = htons(host_port_);
-  inet_pton(AF_INET, host_addres_.c_str(), &host_socket_address_in.sin_addr);
-  std::cout << "Host address: " << host_addres_ << std::endl;
+  host_socket_address_in.sin_addr.s_addr = inet_network(host_addres_.c_str());
+  auto value = inet_pton(AF_INET, host_addres_.c_str(),
+                         &host_socket_address_in.sin_addr);
+  std::cout << "value:" << value << std::endl;
+  // std::cout << "Host address: " << host_addres_ << std::endl;
   memcpy(&host_socket_address_, &host_socket_address_in,
          sizeof(host_socket_address_in));
 
