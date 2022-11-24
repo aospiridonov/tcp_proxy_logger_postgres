@@ -22,7 +22,6 @@ services:
     networks:
       internal_net:
         ipv4_address: 172.20.0.5
-    profiles: ["dev"]
 
   proxy:
     ports:
@@ -39,7 +38,6 @@ services:
     networks:
       internal_net:
         ipv4_address: 172.20.0.6
-    profiles: ["dev"]
 
   postgres_sysbench:
     build: ./postgres_sysbench
@@ -63,7 +61,6 @@ services:
     links:
       - db
       - proxy
-    profiles: ["dev"]
 
 #volumes:
 #  db_vol: {}

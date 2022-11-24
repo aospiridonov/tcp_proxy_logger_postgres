@@ -34,4 +34,4 @@ The purpose of the test task is to test the professional skills of candidates fo
 
 ### Run code with use docker compose
 
-``docker compose --profile dev up``
+``docker compose up``
