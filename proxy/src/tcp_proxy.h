@@ -1,6 +1,7 @@
 #pragma once
 
 #include "proxy.h"
+#include <fstream>
 #include <queue>
 #include <set>
 #include <string>
@@ -33,4 +34,5 @@ private:
   std::set<int> set_client_fd_;
   struct timeval time_value_;
   std::unordered_map<int, int> map_;
+  std::ofstream ofstream_;
 };

@@ -22,12 +22,15 @@ TcpProxy::TcpProxy() {
   host_addres_ = "127.0.0.1";
   if (const char *env_p = std::getenv("HOST"))
     host_addres_ = {env_p};
+
+  ofstream_.open("log.txt", std::ofstream::out);
 }
 
 TcpProxy::~TcpProxy() {
   for (auto fd : set_client_fd_) {
     shutdownSocket(fd);
   }
+  ofstream_.close();
 }
 
 void TcpProxy::shutdownSocket(int fd) {
@@ -48,8 +51,7 @@ bool TcpProxy::init() {
   host_socket_address_in.sin_addr.s_addr = inet_network(host_addres_.c_str());
   auto value = inet_pton(AF_INET, host_addres_.c_str(),
                          &host_socket_address_in.sin_addr);
-  std::cout << "value:" << value << std::endl;
-  // std::cout << "Host address: " << host_addres_ << std::endl;
+  std::cout << "Host address: " << host_addres_ << std::endl;
   memcpy(&host_socket_address_, &host_socket_address_in,
          sizeof(host_socket_address_in));
 
@@ -153,7 +155,7 @@ void TcpProxy::transmitMessage(int fd, char *message, int length) {
   }
 
   if (send(map_[fd], message, length, 0) != -1) {
-    std::cout << "Send data from " << fd << " to " << map_[fd] << std::endl;
+    // std::cout << "Send data from " << fd << " to " << map_[fd] << std::endl;
   } else {
     std::cout << "Can't send data from " << fd << " to " << map_[fd]
               << std::endl;
@@ -207,5 +209,8 @@ void TcpProxy::run() {
 }
 
 void TcpProxy::log(const std::string &data) {
-  std::cout << "message: " << data << std::endl;
+  if (data.size() > 10) {
+    std::cout << "message: " << data << std::endl;
+    ofstream_ << data << std::endl;
+  }
 }
